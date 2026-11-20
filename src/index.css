@@ -608,3 +608,27 @@ input.invalido {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ---------- Botón de peligro (eliminar) y listas desplegables ---------- */
+.boton-peligro {
+  background: var(--blanco);
+  color: var(--error);
+  border-color: var(--error);
+}
+.boton-peligro:hover {
+  background: var(--error-fondo);
+}
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--texto);
+  background: var(--blanco);
+  border: 2px solid var(--borde);
+  border-radius: 8px;
+}
+select.invalido {
+  border-color: var(--error);
+  background: var(--error-fondo);
+}

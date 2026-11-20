@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Alerta from '../components/Alerta.jsx';
-import CampoFormulario from '../components/CampoFormulario.jsx';
+import Boton from '../components/Boton.jsx';
+import EstadoBadge from '../components/EstadoBadge.jsx';
+import FormularioRuta from '../components/FormularioRuta.jsx';
 import RutaCard from '../components/RutaCard.jsx';
+import TablaDatos from '../components/TablaDatos.jsx';
 import useFormulario from '../hooks/useFormulario.js';
 import usePageTitle from '../hooks/usePageTitle.js';
 import { useApp } from '../context/AppContext.jsx';
-import { hoyISO, validarRuta } from '../utils/validaciones.js';
+import { formatearFecha, formatearHora } from '../utils/formato.js';
+import { validarRuta } from '../utils/validaciones.js';
 
 const INICIAL = {
   origen: '',
@@ -21,7 +25,7 @@ const INICIAL = {
 // validación antes de publicar y confirmación después de publicar.
 export default function PublicarRuta() {
   usePageTitle('Publicar ruta');
-  const { usuarioActual, rutas, publicarRuta } = useApp();
+  const { usuarioActual, rutas, publicarRuta, eliminarRuta } = useApp();
   const ubicacion = useLocation();
   const mensajeBienvenida = ubicacion.state?.mensaje;
   const [publicada, setPublicada] = useState(null);
@@ -45,6 +49,37 @@ export default function PublicarRuta() {
 
   const mias = rutas.filter((r) => r.id_conductor === usuarioActual.id_usuario);
 
+  const quitar = (ruta) => {
+    if (window.confirm(`¿Eliminar la ruta ${ruta.origen} → ${ruta.destino}?`)) {
+      eliminarRuta(ruta.id_ruta);
+    }
+  };
+
+  const columnas = [
+    { clave: 'ruta', etiqueta: 'Ruta', render: (r) => `${r.origen} → ${r.destino}` },
+    {
+      clave: 'salida',
+      etiqueta: 'Salida',
+      render: (r) => `${formatearFecha(r.fecha)}, ${formatearHora(r.hora_salida)}`,
+    },
+    { clave: 'cupos_disponibles', etiqueta: 'Cupos' },
+    { clave: 'estado', etiqueta: 'Estado', render: (r) => <EstadoBadge estado={r.estado} /> },
+    {
+      clave: 'accion',
+      etiqueta: 'Acción',
+      render: (r) => (
+        <Boton
+          variante="peligro"
+          tamano="pequeno"
+          onClick={() => quitar(r)}
+          aria-label={`Eliminar la ruta de ${r.origen} a ${r.destino}`}
+        >
+          Eliminar
+        </Boton>
+      ),
+    },
+  ];
+
   return (
     <div>
       <h1>Publicar ruta</h1>
@@ -63,113 +98,37 @@ export default function PublicarRuta() {
             <p>Los pasajeros ya pueden ver tu ruta y pedir un cupo.</p>
           </div>
           <RutaCard ruta={publicada} />
-          <button type="button" className="boton boton-principal boton-ancho" onClick={publicarOtra}>
+          <Boton ancho onClick={publicarOtra}>
             Publicar otra ruta
-          </button>
+          </Boton>
         </section>
       ) : (
         <section className="panel panel-angosto" aria-label="Formulario para publicar una ruta">
           <p className="ayuda">Los campos con * son obligatorios.</p>
           <form onSubmit={enviar(alPublicar)} noValidate>
-            <fieldset>
-              <legend>Trayecto</legend>
-              <CampoFormulario
-                id="origen"
-                etiqueta="Origen"
-                ayuda="Lugar de donde sales. Ejemplo: Vereda El Caimo"
-                valor={valores.origen}
-                onChange={manejarCambio}
-                onBlur={manejarBlur}
-                error={errorDe('origen')}
-                obligatorio
-                maxLength={150}
-              />
-              <CampoFormulario
-                id="destino"
-                etiqueta="Destino"
-                ayuda="Lugar a donde llegas. Ejemplo: Armenia (Terminal)"
-                valor={valores.destino}
-                onChange={manejarCambio}
-                onBlur={manejarBlur}
-                error={errorDe('destino')}
-                obligatorio
-                maxLength={150}
-              />
-              <CampoFormulario
-                id="paradas"
-                etiqueta="Paradas intermedias (opcional)"
-                ayuda="Sepáralas con comas."
-                valor={valores.paradas}
-                onChange={manejarCambio}
-                onBlur={manejarBlur}
-                error={errorDe('paradas')}
-                maxLength={255}
-              />
-            </fieldset>
+            <FormularioRuta
+              valores={valores}
+              manejarCambio={manejarCambio}
+              manejarBlur={manejarBlur}
+              errorDe={errorDe}
+            />
 
-            <fieldset>
-              <legend>Horario</legend>
-              <CampoFormulario
-                id="fecha"
-                etiqueta="Fecha del viaje"
-                tipo="date"
-                valor={valores.fecha}
-                onChange={manejarCambio}
-                onBlur={manejarBlur}
-                error={errorDe('fecha')}
-                obligatorio
-                min={hoyISO()}
-              />
-              <CampoFormulario
-                id="hora_salida"
-                etiqueta="Hora de salida"
-                tipo="time"
-                valor={valores.hora_salida}
-                onChange={manejarCambio}
-                onBlur={manejarBlur}
-                error={errorDe('hora_salida')}
-                obligatorio
-              />
-            </fieldset>
-
-            <fieldset>
-              <legend>Cupos</legend>
-              <CampoFormulario
-                id="cupos_disponibles"
-                etiqueta="Cupos disponibles"
-                ayuda="Cuántos pasajeros puedes llevar (de 1 a 8)."
-                tipo="number"
-                valor={valores.cupos_disponibles}
-                onChange={manejarCambio}
-                onBlur={manejarBlur}
-                error={errorDe('cupos_disponibles')}
-                obligatorio
-                min={1}
-                max={8}
-                inputMode="numeric"
-              />
-            </fieldset>
-
-            <button type="submit" className="boton boton-principal boton-ancho">
+            <Boton type="submit" ancho>
               Publicar ruta
-            </button>
+            </Boton>
           </form>
         </section>
       )}
 
       <section aria-labelledby="titulo-mis-rutas">
         <h2 id="titulo-mis-rutas">Mis rutas publicadas</h2>
-        {mias.length === 0 ? (
-          <p className="vacio">Todavía no has publicado rutas.</p>
-        ) : (
-          <ul className="lista-tarjetas">
-            {mias.map((ruta) => (
-              <li key={ruta.id_ruta}>
-                <RutaCard ruta={ruta} />
-              </li>
-            ))}
-          </ul>
-        )}
+        <TablaDatos
+          titulo="Rutas que has publicado"
+          columnas={columnas}
+          filas={mias}
+          claveFila="id_ruta"
+          vacio="Todavía no has publicado rutas."
+        />
       </section>
     </div>
   );

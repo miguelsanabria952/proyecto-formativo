@@ -10,6 +10,8 @@ import BuscarRutas from './pages/BuscarRutas.jsx';
 import Solicitudes from './pages/Solicitudes.jsx';
 import ViajeConfirmado from './pages/ViajeConfirmado.jsx';
 import PublicarRuta from './pages/PublicarRuta.jsx';
+import AdminUsuarios from './pages/AdminUsuarios.jsx';
+import AdminRutas from './pages/AdminRutas.jsx';
 import NoEncontrada from './pages/NoEncontrada.jsx';
 
 // Componente raíz: encabezado, contenido y definición de la navegación (React Router).
@@ -17,6 +19,7 @@ import NoEncontrada from './pages/NoEncontrada.jsx';
 // Flujo del prototipo:
 //   Login -> (pasajero) Inicio -> Buscar rutas -> Mis solicitudes -> Viaje confirmado
 //         -> (conductor) Publicar ruta
+//         -> (administrador) Usuarios <-> Rutas (módulos de gestión)
 //   Login <-> Registro, Login -> Recuperar contraseña
 export default function App() {
   const { pathname } = useLocation();
@@ -81,6 +84,23 @@ export default function App() {
             element={
               <RutaProtegida rol="conductor">
                 <PublicarRuta />
+              </RutaProtegida>
+            }
+          />
+
+          <Route
+            path="/admin/usuarios"
+            element={
+              <RutaProtegida rol="administrador">
+                <AdminUsuarios />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="/admin/rutas"
+            element={
+              <RutaProtegida rol="administrador">
+                <AdminRutas />
               </RutaProtegida>
             }
           />

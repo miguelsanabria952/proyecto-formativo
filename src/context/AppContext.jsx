@@ -5,6 +5,9 @@ import {
   solicitudesIniciales,
   historialInicial,
 } from '../data/datosIniciales.js';
+import { siguienteId } from '../utils/ids.js';
+import * as rutasService from '../services/rutasService.js';
+import * as usuariosService from '../services/usuariosService.js';
 
 // Estado global de la app SIN servidor: todo vive en memoria y se reinicia al recargar la página.
 // Cuando se conecte el backend, las funciones de este archivo (login, registrar, publicarRuta,
@@ -14,7 +17,8 @@ import {
 
 const AppContext = createContext(null);
 
-const siguienteId = (lista, campo) => lista.reduce((max, x) => Math.max(max, x[campo]), 0) + 1;
+// La lógica de negocio (reglas, unicidad, eliminación en cascada) vive en src/services/; este archivo
+// solo guarda el estado de React y llama a esos servicios.
 
 // `usuarioInicial` solo se usa en pruebas, para arrancar con una sesión ya iniciada.
 export function AppProvider({ children, usuarioInicial = null }) {
@@ -44,53 +48,47 @@ export function AppProvider({ children, usuarioInicial = null }) {
 
   const logout = () => setUsuarioActual(null);
 
-  // Replica las restricciones UNIQUE de la base de datos (correo, identificacion, placa).
+  // Registro público (RF001): crea el usuario y abre su sesión.
   const registrar = (datos) => {
-    const errores = {};
-    const correo = datos.correo.trim().toLowerCase();
-    const identificacion = datos.identificacion.trim();
-    const placa = (datos.placa || '').trim().toUpperCase();
-
-    if (usuarios.some((u) => u.correo.toLowerCase() === correo)) {
-      errores.correo = 'Este correo ya está registrado.';
-    }
-    if (usuarios.some((u) => u.identificacion === identificacion)) {
-      errores.identificacion = 'Esta identificación ya está registrada.';
-    }
-    if (datos.rol === 'conductor' && usuarios.some((u) => u.placa === placa)) {
-      errores.placa = 'Esta placa ya está registrada.';
-    }
-    if (Object.keys(errores).length > 0) return { ok: false, errores };
-
-    const nuevo = {
-      id_usuario: siguienteId(usuarios, 'id_usuario'),
-      nombre: datos.nombre.trim(),
-      identificacion,
-      telefono: datos.telefono.trim(),
-      correo,
-      contrasena: datos.contrasena,
-      rol: datos.rol,
-      ...(datos.rol === 'conductor' ? { licencia: datos.licencia.trim(), placa } : {}),
-    };
-    setUsuarios((previos) => [...previos, nuevo]);
-    setUsuarioActual(nuevo);
-    return { ok: true, usuario: nuevo };
+    const resultado = usuariosService.crearUsuario(usuarios, datos);
+    if (!resultado.ok) return resultado;
+    setUsuarios(resultado.usuarios);
+    setUsuarioActual(resultado.usuario);
+    return resultado;
   };
 
-  const publicarRuta = (datos) => {
-    const nueva = {
-      id_ruta: siguienteId(rutas, 'id_ruta'),
-      id_conductor: usuarioActual.id_usuario,
-      origen: datos.origen.trim(),
-      destino: datos.destino.trim(),
-      paradas: datos.paradas.trim(),
-      fecha: datos.fecha,
-      hora_salida: datos.hora_salida,
-      cupos_disponibles: Number(datos.cupos_disponibles),
-      estado: 'activa',
-    };
-    setRutas((previas) => [...previas, nueva]);
-    return nueva;
+  // Alta de usuario hecha por el administrador: no cambia la sesión actual.
+  const crearUsuario = (datos) => {
+    const resultado = usuariosService.crearUsuario(usuarios, datos);
+    if (resultado.ok) setUsuarios(resultado.usuarios);
+    return resultado;
+  };
+
+  const eliminarUsuario = (idUsuario) => {
+    const resultado = usuariosService.eliminarUsuario(
+      { usuarios, rutas, solicitudes },
+      idUsuario,
+      usuarioActual?.id_usuario
+    );
+    if (resultado.ok) {
+      setUsuarios(resultado.usuarios);
+      setRutas(resultado.rutas);
+      setSolicitudes(resultado.solicitudes);
+    }
+    return resultado;
+  };
+
+  // `idConductor` solo lo envía el administrador; el conductor publica a su nombre.
+  const publicarRuta = (datos, idConductor = usuarioActual.id_usuario) => {
+    const resultado = rutasService.crearRuta(rutas, datos, idConductor);
+    setRutas(resultado.rutas);
+    return resultado.ruta;
+  };
+
+  const eliminarRuta = (idRuta) => {
+    const resultado = rutasService.eliminarRuta(rutas, solicitudes, idRuta);
+    setRutas(resultado.rutas);
+    setSolicitudes(resultado.solicitudes);
   };
 
   const solicitarCupo = (idRuta) => {
@@ -147,8 +145,12 @@ export function AppProvider({ children, usuarioInicial = null }) {
     obtenerRuta,
     login,
     logout,
+    usuarios,
     registrar,
+    crearUsuario,
+    eliminarUsuario,
     publicarRuta,
+    eliminarRuta,
     solicitarCupo,
     responderSolicitud,
   };

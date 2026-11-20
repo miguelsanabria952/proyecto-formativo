@@ -43,6 +43,15 @@ export const usuariosIniciales = [
     licencia: 'LIC-0002',
     placa: 'XYZ98B',
   },
+  {
+    id_usuario: 4,
+    nombre: 'Carlos Administrador',
+    identificacion: '1094000004',
+    telefono: '3009998877',
+    correo: 'admin@demo.com',
+    contrasena: 'Demo1234',
+    rol: 'administrador',
+  },
 ];
 
 export const rutasIniciales = [
