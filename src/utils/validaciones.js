@@ -130,3 +130,17 @@ export function validarRuta(v) {
 
   return errores;
 }
+
+// Alta de usuario hecha por el administrador: mismas reglas del registro, pero sin repetir contraseña.
+export function validarUsuarioAdmin(v) {
+  const errores = validarRegistro({ ...v, confirmar: v.contrasena });
+  if (errores.rol) errores.rol = 'Elige el tipo de usuario.';
+  return errores;
+}
+
+// Ruta creada por el administrador: las reglas de la ruta más el conductor responsable.
+export function validarRutaAdmin(v) {
+  const errores = validarRuta(v);
+  if (vacio(v.id_conductor)) errores.id_conductor = 'Elige el conductor de la ruta.';
+  return errores;
+}

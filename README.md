@@ -25,6 +25,7 @@ Otros comandos: `npm run build` (genera la carpeta `dist`) y `npm run preview` (
 | --------- | -------------------- | ---------- |
 | Pasajero  | pasajero@demo.com    | Demo1234   |
 | Conductor | conductor@demo.com   | Demo1234   |
+| Administrador | admin@demo.com   | Demo1234   |
 
 También puedes crear una cuenta nueva desde «Crear cuenta». Al recargar la página los datos se reinician.
 
@@ -40,6 +41,8 @@ También puedes crear una cuenta nueva desde «Crear cuenta». Al recargar la p�
 | 6         | Confirmación del viaje      | `/viaje/:id`   | Pasajero  |
 | —         | Mis solicitudes (apoyo)     | `/solicitudes` | Pasajero  |
 | —         | Recuperar contraseña (apoyo)| `/recuperar`   | Público   |
+| Módulo 1  | Usuarios (formulario, tabla, eliminar) | `/admin/usuarios` | Administrador |
+| Módulo 2  | Rutas (formulario, tabla, eliminar)    | `/admin/rutas`    | Administrador |
 
 Flujo del pasajero: Login → Inicio → Buscar rutas → Mis solicitudes → Viaje confirmado.
 Flujo del conductor: Login → Publicar ruta.
@@ -61,9 +64,13 @@ src/
 │   ├── EstadoBadge.jsx     Estado con símbolo + texto
 │   ├── RutaCard.jsx        Tarjeta de ruta
 │   ├── TablaDatos.jsx      Tabla reutilizable
+│   ├── Boton.jsx           Botón reutilizable (principal, secundario, peligro)
+│   ├── CampoSelect.jsx     Lista desplegable con etiqueta y error
+│   ├── FormularioRuta.jsx  Campos del formulario de ruta (lo usan 2 módulos)
 │   └── RutaProtegida.jsx   Control de acceso por rol
 ├── pages/                Una pantalla por archivo
-├── context/AppContext.jsx Estado global simulado (reemplazable por la API)
+├── context/AppContext.jsx Estado global (guarda el estado y llama a los servicios)
+├── services/             Reglas de negocio (usuariosService, rutasService); se reemplazan por la API
 ├── hooks/                useFormulario (formularios controlados), usePageTitle
 ├── utils/                validaciones.js, formato.js
 └── data/datosIniciales.js Datos de prueba (campos iguales a la base de datos)
@@ -87,6 +94,13 @@ Formularios controlados (cada campo lee su valor del estado de React). Validan o
 - Contraste alto, letra de 18 px, botones de mínimo 48 px, símbolos junto al color en estados y cupos.
 - Diseño mobile first: 1 columna en celular, 2 en tablet y 3 en computador; las tablas se vuelven tarjetas en celular.
 - Sin animaciones ni fuentes externas (baja conectividad).
+
+## Evidencia: desarrollo de componentes frontend
+
+Dos módulos de gestión (administrador): **Usuarios** y **Rutas**. Cada uno tiene formulario con validaciones,
+tabla que se actualiza al agregar y botón para eliminar (datos en memoria). Las validaciones están en
+`utils/validaciones.js` y las reglas de negocio en `services/`, separadas de las vistas.
+La verificación punto por punto está en `LISTA_DE_CHEQUEO.md`.
 
 ## Pendiente para próximas etapas
 
