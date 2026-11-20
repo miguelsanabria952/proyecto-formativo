@@ -14,4 +14,7 @@ export function formatearHora(hora) {
 export const primerNombre = (nombre = '') => nombre.trim().split(/\s+/)[0] || '';
 
 // Pantalla a la que se envía a cada rol después de ingresar.
-export const rutaInicioDe = (rol) => (rol === 'conductor' ? '/publicar' : '/inicio');
+export function rutaInicioDe(rol) {
+  if (rol === 'administrador') return '/admin/usuarios';
+  return rol === 'conductor' ? '/publicar' : '/inicio';
+}

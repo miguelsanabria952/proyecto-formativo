@@ -19,6 +19,11 @@ export default function Header() {
       { a: '/login', texto: 'Ingresar' },
       { a: '/registro', texto: 'Crear cuenta' },
     ];
+  } else if (usuarioActual.rol === 'administrador') {
+    enlaces = [
+      { a: '/admin/usuarios', texto: 'Usuarios' },
+      { a: '/admin/rutas', texto: 'Rutas' },
+    ];
   } else if (usuarioActual.rol === 'conductor') {
     enlaces = [{ a: '/publicar', texto: 'Publicar ruta' }];
   } else {
