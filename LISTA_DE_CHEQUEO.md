@@ -68,10 +68,10 @@ Cuentas de prueba (contraseña `Demo1234`): `admin@demo.com` (módulos Usuarios 
 
 | # | Punto a verificar | Dónde está | Cumple | Observaciones |
 |---|-------------------|------------|:------:|---------------|
-| 7.1 | Proyecto sincronizado con GitHub | `miguelsanabria952/proyecto-formativo` | ☐ | |
-| 7.2 | Commits con mensajes claros, por rama y pull request | Historial del repositorio | ☐ | |
-| 7.3 | No se sube `node_modules` ni `.env` | `.gitignore` | ☐ | |
-| 7.4 | Video corto con la fecha visible del computador | Ver `GUION_VIDEO.md` | ☐ | |
+| 7.1 | Proyecto sincronizado con GitHub | `miguelsanabria952/proyecto-formativo` | ☑ | |
+| 7.2 | Commits con mensajes claros, por rama y pull request | Historial del repositorio | ☑ | |
+| 7.3 | No se sube `node_modules` ni `.env` | `.gitignore` | ☑ | |
+| 7.4 | Video corto con la fecha visible del computador | Ver `GUION_VIDEO.md` | ☑ | |
 
 ## Hallazgos encontrados y corregidos
 
